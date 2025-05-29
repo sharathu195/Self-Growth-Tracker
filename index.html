@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>2-Month Self-Growth Tracker</title>
+  <style>
+    body {
+      background-color: #0a1a33;
+      color: white;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .progress-container {
+      width: 100%;
+      background-color: #1a2a55;
+      border-radius: 1rem;
+      overflow: hidden;
+      height: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px #0f254d88;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #66ccff, #003366);
+      border-radius: 1rem;
+      transition: width 0.5s ease-in-out;
+      box-shadow: 0 0 8px #66ccffaa;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      background-color: #15264d;
+      color: white;
+      border-radius: 1rem;
+      padding: 20px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.5);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+    }
+    .card h2 {
+      font-size: 1.3rem;
+      margin-bottom: 15px;
+      color: #a3c1ff;
+    }
+    .checkbox-group {
+      margin-bottom: 15px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    label {
+      font-weight: 600;
+      cursor: pointer;
+      user-select: none;
+    }
+    .description {
+      font-size: 0.85rem;
+      color: #cbd4ffcc;
+      margin-left: 32px;
+      margin-top: 4px;
+      white-space: pre-line;
+    }
+    .details-toggle {
+      display: block;
+      margin: 20px auto;
+      padding: 12px 25px;
+      background: #66a3ff;
+      color: #0a1a33;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1rem;
+      box-shadow: 0 3px 10px #4477ddaa;
+      transition: background-color 0.3s ease;
+    }
+    .details-toggle:hover {
+      background: #5587e6;
+    }
+    .details-content {
+      display: none;
+      background: #15264d; /* dark blue like cards */
+      color: #cbd4ff;      /* light blue text */
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 1rem;
+      max-height: 70vh;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: 'Courier New', Courier, monospace;
+      box-shadow: 0 0 15px #4466aa88;
+      border: 1px solid #2a3b70;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>2-Month Self-Growth Tracker</h1>
+
+  <!-- Progress bar -->
+  <div class="progress-container" aria-label="Progress Bar">
+    <div class="progress-bar" id="progress-bar"></div>
+  </div>
+
+  <button class="details-toggle" onclick="toggleDetails()">Show Full Plan</button>
+  <div class="details-content" id="details"></div>
+
+  <div class="grid" id="tracker"></div>
+
+  <script>
+    const days = Array.from({ length: 56 }, (_, i) => `Day ${i + 1} (Week ${Math.floor(i / 7) + 1})`);
+
+    // Tasks by week (keys consistent, but descriptions can vary per week)
+    const tasksByWeek = {
+      1: {
+        "Emotional Check-in": "Spend 5–10 minutes asking yourself: How do I feel right now? Why might I feel this way? Journal your answer or speak it aloud.",
+        "Relationship Skills Practice": "Actively listen when your partner talks. Reflect back what you hear. Avoid jumping to your own feelings.",
+        "Individuality Exercise": "Do one thing today just for you. Make a decision, form an opinion, or explore a hobby based on your curiosity.",
+        "Selfless Act": "Do one helpful thing for someone without expecting anything in return. Let it be about them, not you.",
+        "Reflection Journal": "Write about a situation today where you could have reacted differently. What would a more emotionally aware version of you do?"
+      },
+      2: {
+        "Emotional Check-in": "Learn to pause before reacting. Count to 5. Then respond.\nTrack emotional triggers and write what led to them.",
+        "Relationship Skills Practice": "Use \"I feel [emotion] because [situation]\" instead of blaming.",
+        "Individuality Exercise": "Pick a solo activity (watch a movie, explore music, cook). Reflect on how *you* felt.\nJournal: \"What do *I* think about this, really?\"",
+        "Selfless Act": "Take mental space to understand your partner’s struggle without inserting your own story.\nOffer to take over a small task for your partner they usually handle.",
+        "Reflection Journal": "What triggers came up for me?\nHow did I manage them?"
+      },
+      3: {
+        "Emotional Check-in": "Name complex feelings like anxiety or excitement. Try to identify physical sensations linked to feelings.",
+        "Relationship Skills Practice": "Practice reflective listening — repeat back what your partner said in your own words.",
+        "Individuality Exercise": "Choose a personal boundary to practice setting with kindness and clarity.",
+        "Selfless Act": "Do a kind act that supports your partner’s growth or wellbeing.",
+        "Reflection Journal": "Reflect on moments when you felt most like yourself today."
+      },
+      4: {
+        "Emotional Check-in": "Notice if your emotions are influencing your thoughts or actions. Write down any patterns.",
+        "Relationship Skills Practice": "Ask open-ended questions to invite your partner’s feelings and thoughts.",
+        "Individuality Exercise": "Engage in an activity you’ve been curious about but hesitant to try.",
+        "Selfless Act": "Listen to your partner without trying to fix or solve — just be present.",
+        "Reflection Journal": "How did compassion show up in your actions today?"
+      },
+      5: {
+        "Emotional Check-in": "Track your emotional highs and lows. Journal how they influenced your day.",
+        "Relationship Skills Practice": "Express appreciation for your partner’s specific actions or qualities.",
+        "Individuality Exercise": "Identify a personal value you want to honor and act on it today.",
+        "Selfless Act": "Perform a selfless act with no expectation of acknowledgement or reward.",
+        "Reflection Journal": "What emotional patterns do I notice repeating?"
+      },
+      6: {
+        "Emotional Check-in": "Practice managing frustration: breathe deeply, pause, and choose your response.",
+        "Relationship Skills Practice": "Use \"I\" statements during disagreements to reduce blame.",
+        "Individuality Exercise": "Spend time alone reflecting on your goals and desires.",
+        "Selfless Act": "Offer emotional support to your partner during a challenging moment.",
+        "Reflection Journal": "How did I handle conflict or disagreement today?"
+      },
+      7: {
+        "Emotional Check-in": "Recognize when you’re shutting down emotionally and gently re-engage.",
+        "Relationship Skills Practice": "Clearly express your needs and listen for your partner’s needs.",
+        "Individuality Exercise": "Take initiative on a decision without seeking approval.",
+        "Selfless Act": "Show patience and understanding in moments of tension.",
+        "Reflection Journal": "What needs did I express clearly today?"
+      },
+      8: {
+        "Emotional Check-in": "Reflect on your emotional growth over the past weeks.",
+        "Relationship Skills Practice": "Discuss with your partner how you’ve both grown and changed.",
+        "Individuality Exercise": "Celebrate your individuality and unique perspective.",
+        "Selfless Act": "Act with empathy and self-awareness in all interactions.",
+        "Reflection Journal": "What have I learned about myself and my relationships?"
+      }
+    };
+
+    const planDetails = `
+2-Month Self-Growth Plan: Emotional Intelligence, Empathy, Relationship Skills, Individuality & Selflessness
+
+🌟 OVERVIEW
+This 8-week plan is designed to help you:
+
+• Build emotional awareness and emotional intelligence
+• Become a more supportive, empathetic, and selfless partner
+• Cultivate your own individuality and sense of self
+• Develop healthier responses in relationships
+
+This plan can be repeated or adapted beyond the 2-month mark for continued growth.
+
+✅ WEEKLY STRUCTURE
+Each week has 5 components:
+
+Emotional Intelligence & Empathy
+
+Relationship Skills Practice
+
+Individuality & Inner Compass
+
+Selflessness in Action
+
+Reflection (Journaling Prompts)
+
+Time Required: ~30–45 minutes per day
+
+☑️ WEEK 1: AWARENESS & HONESTY
+Emotional Intelligence & Empathy:
+• Daily check-in: "What am I feeling right now? Where do I feel it in my body?"
+• Watch: Brené Brown on Empathy (YouTube)
+
+Relationship Skills:
+• Practice listening without offering advice. Just reflect what the other person feels.
+
+Individuality & Inner Compass:
+• Journal: "What opinions do I hide or soften to avoid conflict?"
+• List 5 things you’ve pretended to like or agree with.
+
+Selflessness in Action:
+• Do one act of kindness each day for your partner without expecting anything in return.
+• Ask your partner: “What would help you feel supported today?”
+
+Reflection Prompts:
+• What did I learn about myself this week?
+• When did I feel most myself?
+
+☑️ WEEK 2: SELF-REGULATION & PERSONAL TRUTH
+Emotional Intelligence & Empathy:
+• Learn to pause before reacting. Count to 5. Then respond.
+• Track emotional triggers and write what led to them.
+
+Relationship Skills:
+• Use "I feel [emotion] because [situation]" instead of blaming.
+
+Individuality & Inner Compass:
+• Pick a solo activity (watch a movie, explore music, cook). Reflect on how you felt.
+• Journal: "What do I think about this, really?"
+
+Selflessness in Action:
+• Take mental space to understand your partner’s struggle without inserting your own story.
+• Offer to take over a small task for your partner they usually handle.
+
+Reflection Prompts:
+• What triggers came up for me?
+• How did I manage them?
+
+☑️ WEEK 3: EMPATHIC CONNECTION & BOUNDARIES
+Emotional Intelligence & Empathy:
+• Practice labeling others' emotions: "It seems like you're feeling..."
+• Reflect: Am I listening to understand or fix?
+
+Relationship Skills:
+• Ask your partner how they want to be supported when they're low.
+
+Individuality & Inner Compass:
+• In a conversation, state a differing opinion respectfully.
+• Journal: "How did it feel to speak up honestly?"
+
+Selflessness in Action:
+• Choose to be present with your partner without distractions.
+• Focus fully on their experience—don't relate it back to yourself.
+
+Reflection Prompts:
+• When did I feel connected this week?
+• When did I hide parts of myself?
+
+☑️ WEEK 4: NURTURING TRUST
+Emotional Intelligence & Empathy:
+• Start practicing emotional validation: "That sounds really hard. I'm here."
+
+Relationship Skills:
+• Follow through on one promise or intention.
+• Ask your partner for feedback (without defensiveness).
+
+Individuality & Inner Compass:
+• Choose a solo curiosity project (learn, make, explore something new).
+• Let it be yours. Don’t share it yet.
+
+Selflessness in Action:
+• Reflect on your partner’s needs and priorities before making a joint decision.
+• Ask: “How can I lighten your load this week?”
+
+Reflection Prompts:
+• What value do I bring to relationships?
+• What parts of me feel authentic?
+
+☑️ WEEK 5: VALUES & IDENTITY
+Emotional Intelligence & Empathy:
+• Explore: Where do my emotions come from? What past experiences shaped me?
+
+Relationship Skills:
+• Discuss your emotional patterns with your partner.
+• Ask: "How can I show up better for you?"
+
+Individuality & Inner Compass:
+• Do a values inventory (use personalvalu.es or reflect on: What do I admire in others?)
+• Define your top 3 values.
+
+Selflessness in Action:
+• Think about a time your partner felt unsupported. Imagine what they needed.
+• Offer it now, without needing to talk about the past.
+
+Reflection Prompts:
+• Who am I when I’m alone?
+• What matters most to me?
+
+☑️ WEEK 6: ASSERTIVENESS & HONESTY
+Emotional Intelligence & Empathy:
+• Practice tolerating difficult emotions without reacting immediately.
+• Use breathwork or mindfulness daily (10 mins).
+
+Relationship Skills:
+• Share one vulnerability openly.
+• Ask: "Is there anything you’ve been holding in?"
+
+Individuality & Inner Compass:
+• Pick a topic your girlfriend loves. Explore your own opinion.
+• Journal: "What do I like/dislike? Would I like this if I’d never met her?"
+
+Selflessness in Action:
+• Let your partner have the final say in a shared decision.
+• Acknowledge when you’ve made something about yourself and shift focus back to them.
+
+Reflection Prompts:
+• What scares me about being myself?
+• How can I be honest and kind at once?
+
+☑️ WEEK 7: CONFLICT & CLOSENESS
+Emotional Intelligence & Empathy:
+• Observe how you deal with disagreement. What body sensations show up?
+• Try: "I see your side, and I also feel..."
+
+Relationship Skills:
+• Discuss a recurring argument. What patterns do you notice?
+• Make a shared plan to avoid the loop.
+
+Individuality & Inner Compass:
+• Practice saying "I" statements more often.
+• Journal: "What am I learning about myself that surprises me?"
+
+Selflessness in Action:
+• Try a “silent support” gesture: notes, a meal, doing a chore without mention.
+• Focus on what your partner needs, not what you want to be seen doing.
+
+Reflection Prompts:
+• Where did I show growth?
+• Where did I default to old patterns?
+
+☑️ WEEK 8: OWNERSHIP & DIRECTION
+Emotional Intelligence & Empathy:
+• Review the last 7 weeks. What emotions were hardest to sit with? Which got easier?
+
+Relationship Skills:
+• Write your partner a letter summarizing how you’ve grown.
+• Invite their reflection.
+
+Individuality & Inner Compass:
+• Write an "About Me" for yourself:
+• Who am I?
+• What do I stand for?
+• What am I still figuring out?
+
+Selflessness in Action:
+• Reflect on how to be selfless without self-erasing.
+• Make a commitment to one habit of generosity going forward.
+
+Reflection Prompts:
+• What kind of partner do I want to be?
+• How do I keep growing without losing myself?
+
+🌄 Daily Practices
+• 10 min mindfulness or breathwork
+• 10 min journaling
+• Check in with a friend or partner (emotional state + one kind question)
+• One selfless act or gesture daily
+
+#•# 📚 Resources
+
+• Videos (by Week):
+- Week 2: [Brené Brown – “The Power of Vulnerability”](https://www.youtube.com/watch?v=iCvmsMzlF7o)  
+- Week 3: [Kristin Neff – “The Space Between Self-Esteem and Self-Compassion”](https://www.youtube.com/watch?v=IvtZBUSplr4)  
+- Week 4: [Tara Brach – “Learning to Respond, Not React”](https://www.youtube.com/watch?v=Qe7E06e2hOQ)  
+- Week 5: [Thich Nhat Hanh – “Deep Listening”](https://www.youtube.com/watch?v=lyUxYflkhzo)  
+- Week 6: [Marshall Rosenberg – “Nonviolent Communication Workshop”](https://www.youtube.com/watch?v=4LuPCAh9FCc)  
+- Week 7: [Nedra Glover Tawwab – “How to Set and Keep Better Boundaries”](https://www.youtube.com/watch?v=Iu-eRZ6QED4)  
+- Week 8: [Esther Perel – “How to Rebuild Trust After a Betrayal”](https://www.youtube.com/watch?v=VOXfY3Dg6zg)  
+
+• Books (by Weeks):
+- Weeks 1–2: *Emotional Agility* by Susan David  
+- Weeks 3–4: *Radical Acceptance* by Tara Brach  
+- Weeks 5–6: *Nonviolent Communication* by Marshall Rosenberg  
+- Weeks 7–8: *Set Boundaries, Find Peace* by Nedra Glover Tawwab
+
+🌟 Monthly Review (After 2 Months)
+• What has changed in how I handle emotions?
+• How has my relationship evolved?
+• Do I feel more like me?
+• Am I showing up in selfless ways?
+• What do I want to carry forward into the next 2 months?
+
+This plan is not a replacement for therapy, but if done sincerely, it can lay a strong foundation for emotional maturity, self-awareness, individuality, and deeper connection—with both yourself and your partner.
+`;
+
+    function toggleDetails() {
+      const details = document.getElementById("details");
+      const btn = document.querySelector(".details-toggle");
+      if (details.style.display === "none" || details.style.display === "") {
+        details.style.display = "block";
+        details.textContent = planDetails;
+        btn.textContent = "Hide Full Plan";
+      } else {
+        details.style.display = "none";
+        btn.textContent = "Show Full Plan";
+      }
+    }
+
+    // Load saved checkboxes from localStorage
+    const checked = JSON.parse(localStorage.getItem("selfGrowthProgress") || "{}");
+
+    function saveState() {
+      localStorage.setItem("selfGrowthProgress", JSON.stringify(checked));
+      updateProgressBar();
+    }
+
+    function toggleCheck(key) {
+      checked[key] = !checked[key];
+      saveState();
+      document.getElementById(key).checked = checked[key];
+    }
+
+    // Generate checklist cards
+    const tracker = document.getElementById("tracker");
+
+    days.forEach(day => {
+      const dayNum = parseInt(day.match(/\d+/)[0]);
+      const weekNum = Math.floor((dayNum - 1) / 7) + 1;
+
+      // Use tasks for the week; if no tasks defined, fallback to week 1 tasks
+      const currentTasks = tasksByWeek[weekNum] || tasksByWeek[1];
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const title = document.createElement("h2");
+      title.textContent = day;
+      card.appendChild(title);
+
+      for (const task in currentTasks) {
+        const key = `${day}-${task}`;
+        const group = document.createElement("div");
+        group.className = "checkbox-group";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = key;
+        checkbox.checked = checked[key] || false;
+        checkbox.addEventListener("change", () => toggleCheck(key));
+
+        const label = document.createElement("label");
+        label.htmlFor = key;
+        label.textContent = task;
+
+        const desc = document.createElement("div");
+        desc.className = "description";
+        desc.textContent = currentTasks[task];
+
+        group.appendChild(checkbox);
+        group.appendChild(label);
+        group.appendChild(desc);
+        card.appendChild(group);
+      }
+
+      tracker.appendChild(card);
+    });
+
+    // Progress bar logic
+    function updateProgressBar() {
+      const tasksPerDay = Object.keys(tasksByWeek[1]).length; // 5 tasks per day
+      const totalTasks = days.length * tasksPerDay;
+
+      let completed = 0;
+      for (const key in checked) {
+        if (checked[key]) completed++;
+      }
+      const percent = (completed / totalTasks) * 100;
+      const progressBar = document.getElementById("progress-bar");
+      progressBar.style.width = `${percent.toFixed(1)}%`;
+      progressBar.setAttribute("aria-valuenow", percent.toFixed(1));
+      progressBar.setAttribute("aria-valuemin", 0);
+      progressBar.setAttribute("aria-valuemax", 100);
+      progressBar.setAttribute("aria-label", `Progress: ${percent.toFixed(1)}% completed`);
+    }
+
+    updateProgressBar();
+  </script>
+</body>
+</html>
