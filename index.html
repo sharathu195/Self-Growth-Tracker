@@ -4,6 +4,40 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>2-Month Self-Growth Tracker</title>
+
+  <!-- Firebase SDKs (Remove if not using Firebase) -->
+  <!-- Firebase App -->
+  <script type="module">
+    // Import Firebase SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+  
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDk_v35vbpPqggeJ_NlxUtqYkYlAo19kqg",
+      authDomain: "self-improvement-tracker.firebaseapp.com",
+      projectId: "self-improvement-tracker",
+      storageBucket: "self-improvement-tracker.firebasestorage.app",
+      messagingSenderId: "450001905928",
+      appId: "1:450001905928:web:2252693348f7f78dc7e4bd"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Save sample data
+    async function saveData() {
+      await setDoc(doc(db, "testCollection", "testDoc"), {
+        name: "Sharath",
+        time: new Date().toISOString()
+      });
+      console.log("Data written to Firebase!");
+    }
+
+    saveData();
+  </script>
+
   <style>
     body {
       background-color: #0a1a33;
@@ -94,8 +128,8 @@
     }
     .details-content {
       display: none;
-      background: #15264d; /* dark blue like cards */
-      color: #cbd4ff;      /* light blue text */
+      background: #15264d;
+      color: #cbd4ff;
       padding: 20px;
       margin-top: 20px;
       border-radius: 1rem;
@@ -106,7 +140,6 @@
       box-shadow: 0 0 15px #4466aa88;
       border: 1px solid #2a3b70;
     }
-
   </style>
 </head>
 <body>
@@ -125,7 +158,6 @@
   <script>
     const days = Array.from({ length: 56 }, (_, i) => `Day ${i + 1} (Week ${Math.floor(i / 7) + 1})`);
 
-    // Tasks by week (keys consistent, but descriptions can vary per week)
     const tasksByWeek = {
       1: {
         "Emotional Check-in": "Spend 5–10 minutes asking yourself: How do I feel right now? Why might I feel this way? Journal your answer or speak it aloud.",
@@ -423,7 +455,6 @@ This plan is not a replacement for therapy, but if done sincerely, it can lay a 
       }
     }
 
-    // Load saved checkboxes from localStorage
     const checked = JSON.parse(localStorage.getItem("selfGrowthProgress") || "{}");
 
     function saveState() {
@@ -437,14 +468,11 @@ This plan is not a replacement for therapy, but if done sincerely, it can lay a 
       document.getElementById(key).checked = checked[key];
     }
 
-    // Generate checklist cards
     const tracker = document.getElementById("tracker");
 
     days.forEach(day => {
       const dayNum = parseInt(day.match(/\d+/)[0]);
       const weekNum = Math.floor((dayNum - 1) / 7) + 1;
-
-      // Use tasks for the week; if no tasks defined, fallback to week 1 tasks
       const currentTasks = tasksByWeek[weekNum] || tasksByWeek[1];
 
       const card = document.createElement("div");
@@ -482,9 +510,8 @@ This plan is not a replacement for therapy, but if done sincerely, it can lay a 
       tracker.appendChild(card);
     });
 
-    // Progress bar logic
     function updateProgressBar() {
-      const tasksPerDay = Object.keys(tasksByWeek[1]).length; // 5 tasks per day
+      const tasksPerDay = Object.keys(tasksByWeek[1]).length;
       const totalTasks = days.length * tasksPerDay;
 
       let completed = 0;
